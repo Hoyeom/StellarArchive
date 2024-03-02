@@ -3,7 +3,7 @@
   "displayName": "StellarArchive",
   "author": { "name": "Hoyeom", "url": "https://github.com/Hoyeom" },
   "version": "0.0.1",
-  "unity": "2022.3.20",
+  "unity": "2022.3",
   "description": "A framework for improving productivity",
   "keywords": [ ],
   "license": "MIT",
