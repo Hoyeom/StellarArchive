@@ -24,9 +24,6 @@ namespace StellarArchive
 
         private void Start()
         {
-#if UNITY_EDITOR
-            Debug.Log($"[Start] {_data}");
-#endif
             InitializeAsync();
         }
 

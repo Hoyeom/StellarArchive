@@ -8,7 +8,8 @@ public class SceneAssetLoad : BaseScene
 {
     protected override async UniTaskVoid InitializeAsync()
     {
-        await UniTask.Delay(2000, false, PlayerLoopTiming.Update, CancellationToken);
-        await LoadSceneAsync<SceneLauncher>("SceneAssetLoad");
+        await UniTask.Delay(1000, false, PlayerLoopTiming.Update, CancellationToken);
+        
+        await LoadSceneAsync<SceneLauncher>();
     }
 }
