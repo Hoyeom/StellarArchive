@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿// ReSharper disable CheckNamespace
+
 using System.Threading;
 using UnityEngine;
 using UnityEngine.Events;
@@ -10,7 +11,7 @@ using Cysharp.Threading.Tasks;
 
 namespace StellarArchive
 {
-    [AddComponentMenu("UI/SaButton", 30)]
+    [AddComponentMenu("StellarArchive/UI/SaButton", 0)]
     public class SaButton : Selectable, IPointerClickHandler, ISubmitHandler
     {
         [SerializeField] private UnityEvent onClick;

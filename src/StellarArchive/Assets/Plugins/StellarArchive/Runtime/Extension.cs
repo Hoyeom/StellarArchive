@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿// ReSharper disable CheckNamespace
+
+using UnityEngine;
 
 namespace StellarArchive
 {

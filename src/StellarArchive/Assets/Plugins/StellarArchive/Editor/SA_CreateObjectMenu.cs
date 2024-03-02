@@ -12,7 +12,7 @@ namespace StellarArchive.Editor
     public static class SA_CreateObjectMenu
     {
 #if STELLARARCHIVE_TEXTMESHPRO_SUPPORT
-        [MenuItem("GameObject/StellarArchive/Button - TextMeshPro", false, 2031)]
+        [MenuItem("GameObject/StellarArchive/Button - TextMeshPro", false, 0)]
         public static void AddButton(MenuCommand menuCommand)
         {
             GameObject go = SA_DefaultControls.CreateButton(GetStandardResources());
