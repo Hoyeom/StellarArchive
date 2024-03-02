@@ -8,5 +8,16 @@
   "keywords": [ ],
   "license": "MIT",
   "category": "Framework",
-  "dependencies": {}
+  "samples": [
+    {
+      "displayName": "Sample Loading",
+      "description": "Sample scenes that demonstrate the usage of the Loading.",
+      "path": "Samples/Sample Loading"
+    }
+  ],
+  "dependencies": {},
+  "repository": {
+    "url": "https://github.com/Hoyeom/StellarArchive.git",
+    "type": "git"
+  }
 }
