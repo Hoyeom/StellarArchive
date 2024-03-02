@@ -1,0 +1,32 @@
+{
+	"name": "StellarArchive",
+	"rootNamespace": "",
+	"references": [
+		"UniTask"
+	],
+	"includePlatforms": [],
+	"excludePlatforms": [],
+	"allowUnsafeCode": false,
+	"overrideReferences": false,
+	"precompiledReferences": [],
+	"autoReferenced": true,
+	"defineConstraints": [],
+	"versionDefines": [
+		{
+			"name": "com.unity.ugui",
+			"expression": "",
+			"define": "STELLARARCHIVE_UGUI_SUPPORT"
+		},
+		{
+			"name": "com.unity.modules.unitywebrequest",
+			"expression": "",
+			"define": "STELLARARCHIVE_WEBREQUEST_SUPPORT"
+		},
+		{
+			"name": "com.cysharp.unitask",
+			"expression": "",
+			"define": "STELLARARCHIVE_UNITASK_SUPPORT"
+		}
+	],
+	"noEngineReferences": false
+}

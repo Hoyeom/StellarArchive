@@ -1,17 +1,27 @@
 {
-	"name": "StellarArchive.Editor",
-	"references": [
-		"UniTask"
-	],
-	"includePlatforms": [
-		"Editor"
-	],
-	"excludePlatforms": [],
-	"allowUnsafeCode": false,
-	"overrideReferences": false,
-	"precompiledReferences": [],
-	"autoReferenced": false,
-	"defineConstraints": [],
-	"versionDefines": [],
-	"noEngineReferences": false
+    "name": "StellarArchive.Editor",
+    "rootNamespace": "",
+    "references": [
+        "UniTask",
+        "Unity.TextMeshPro",
+        "Unity.TextMeshPro.Editor",
+        "StellarArchive"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.textmeshpro",
+            "expression": "",
+            "define": "STELLARARCHIVE_TEXTMESHPRO_SUPPORT"
+        }
+    ],
+    "noEngineReferences": false
 }
