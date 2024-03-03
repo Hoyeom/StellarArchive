@@ -12,7 +12,7 @@ using Cysharp.Threading.Tasks;
 namespace StellarArchive
 {
     [AddComponentMenu("StellarArchive/UI/SaButton", 0)]
-    public class SaButton : Selectable, IPointerClickHandler, ISubmitHandler
+    public class SaButton : SaSelectable, IPointerClickHandler, ISubmitHandler
     {
         [SerializeField] private UnityEvent onClick;
         [SerializeField] private float scaleFactor = 0.95f;

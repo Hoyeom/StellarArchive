@@ -9,7 +9,6 @@ public class SceneLauncher : BaseScene
     // ReSharper disable once Unity.IncorrectMethodSignature
     protected async UniTaskVoid Start()
     {
-        await Loading.StartAnimationAsync(0);
         await LoadSceneAsync<SceneAssetLoad>();
     }
 }

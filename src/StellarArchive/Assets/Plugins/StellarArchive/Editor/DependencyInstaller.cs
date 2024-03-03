@@ -87,7 +87,7 @@ namespace StellarArchive.Editor
 
             if (dependencies.ContainsKey("com.cysharp.unitask"))
             {
-                Debug.Log("UniTask is already installed.");
+                // Debug.Log("UniTask is already installed.");
                 return;
             }
 
@@ -137,11 +137,10 @@ namespace StellarArchive.Editor
         public static bool TryCreateNewGroup(string groupName, out AddressableAssetGroup group)
         {
             AddressableAssetSettings settings =AddressableAssetSettingsDefaultObject.GetSettings(true);
+            group = null;
             
             if (settings.FindGroup(groupName) != null)
             {
-                Debug.Log($"Addressable Asset Group '{groupName}' already exists.");
-                group = settings.FindGroup(groupName);
                 return false;
             }
 
