@@ -100,8 +100,8 @@ namespace StellarArchive.Editor
 #if STELLARARCHIVE_ADDRESSABLE_SUPPORT
         public static bool TryCreateNewGroup(string groupName, out AddressableAssetGroup group)
         {
-            AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
-
+            AddressableAssetSettings settings =AddressableAssetSettingsDefaultObject.GetSettings(true);
+            
             if (settings.FindGroup(groupName) != null)
             {
                 Debug.Log($"Addressable Asset Group '{groupName}' already exists.");
