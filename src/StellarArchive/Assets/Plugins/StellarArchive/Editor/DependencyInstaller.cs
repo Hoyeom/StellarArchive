@@ -1,11 +1,13 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using UnityEditor;
-using UnityEditor.AddressableAssets;
-using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.PackageManager;
 using UnityEngine;
+
+#if STELLARARCHIVE_ADDRESSABLE_SUPPORT
+using UnityEditor.AddressableAssets;
+using UnityEditor.AddressableAssets.Settings;
+#endif
 
 namespace StellarArchive.Editor
 {
