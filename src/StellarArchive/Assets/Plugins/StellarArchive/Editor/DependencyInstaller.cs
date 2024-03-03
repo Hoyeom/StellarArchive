@@ -69,6 +69,7 @@ namespace StellarArchive.Editor
             {
                 asset = ScriptableObject.CreateInstance<LoadingSetting>();
                 string path = AssetDatabase.GenerateUniqueAssetPath("Assets/LoadingSetting.asset");
+                AssetDatabase.Refresh();
                 AssetDatabase.CreateAsset(asset, path);
                 AssetDatabase.SaveAssets();
 
