@@ -1,20 +1,20 @@
 // ReSharper disable CheckNamespace
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+
+#if STELLARARCHIVE_UNITASK_SUPPORT
+using Cysharp.Threading.Tasks;
+#endif
 
 namespace StellarArchive
 {
     public abstract class BaseScene : MonoBehaviour
     {
+#if STELLARARCHIVE_UNITASK_SUPPORT
         protected CancellationToken CancellationToken;
-        
+
         private void Awake()
         {
             CancellationToken = gameObject.GetCancellationTokenOnDestroy();
@@ -37,5 +37,7 @@ namespace StellarArchive
             Debug.Log($"[LoadSceneAsync] {nextSceneName}".FormatColoredString(Color.cyan));
 #endif
         }
+        
+#endif
     }
 }
