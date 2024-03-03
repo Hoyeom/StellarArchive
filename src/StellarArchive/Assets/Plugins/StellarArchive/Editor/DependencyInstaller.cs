@@ -9,8 +9,7 @@ using UnityEngine;
 
 namespace StellarArchive.Editor
 {
-    [InitializeOnLoad]
-    public class DependencyInstaller
+    public class DependencyInstaller : AssetPostprocessor
     {
         static DependencyInstaller()
         {
