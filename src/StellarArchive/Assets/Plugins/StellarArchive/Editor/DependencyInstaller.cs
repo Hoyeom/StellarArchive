@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
+using Unity.Plastic.Newtonsoft.Json.Linq;
 using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEngine;
@@ -14,6 +15,8 @@ namespace StellarArchive.Editor
     [InitializeOnLoad]
     public class DependencyInstaller : AssetPostprocessor
     {
+        private static readonly string ManifestFilePath = Path.Combine(Application.dataPath, "../Packages/manifest.json");
+        private static readonly string UniTaskGitUrl = "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask";
 
         static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths, bool didDomainReload)
         {
@@ -21,6 +24,7 @@ namespace StellarArchive.Editor
         }
         static DependencyInstaller()
         {
+            InstallUniTask();
             TryInstallPackage("com.unity.addressables");
         }
         
@@ -63,6 +67,36 @@ namespace StellarArchive.Editor
             }
         }
 
+        public static void InstallUniTask()
+        {
+            if (!File.Exists(ManifestFilePath))
+            {
+                Debug.LogError("manifest.json not found.");
+                return;
+            }
+
+            string manifestContent = File.ReadAllText(ManifestFilePath);
+            var manifestJson = JObject.Parse(manifestContent);
+
+            var dependencies = (JObject) manifestJson["dependencies"];
+            if (dependencies == null)
+            {
+                Debug.LogError("Dependencies not found in manifest.json.");
+                return;
+            }
+
+            if (dependencies.ContainsKey("com.cysharp.unitask"))
+            {
+                Debug.Log("UniTask is already installed.");
+                return;
+            }
+
+            dependencies["com.cysharp.unitask"] = UniTaskGitUrl;
+            File.WriteAllText(ManifestFilePath, manifestJson.ToString());
+
+            Debug.Log("UniTask installed successfully.");
+            AssetDatabase.Refresh();
+        }
 
         private static void CreateScriptableObject()
         {
