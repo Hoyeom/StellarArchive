@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using UnityEngine.AddressableAssets;
 using Object = UnityEngine.Object;
+
+#if STELLARARCHIVE_ADDRESSABLE_SUPPORT
+using UnityEngine.AddressableAssets;
+#endif
 
 namespace StellarArchive
 {
@@ -43,10 +46,11 @@ namespace StellarArchive
         {
             if (_loadingSetting == null)
             {
+#if STELLARARCHIVE_ADDRESSABLE_SUPPORT
                 var handle = Addressables.LoadAssetAsync<LoadingSetting>(nameof(LoadingSetting));
                 await handle;
                 _loadingSetting = handle.Result;
-
+#endif
                 _loadingDataMap = new Dictionary<int, Data>();
             }
 
