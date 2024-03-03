@@ -25,7 +25,7 @@ namespace StellarArchive
         
         public class Data
         {
-            public LoadingCanvas LoadingCanvas;
+            public readonly LoadingCanvas LoadingCanvas;
             public Status Status;
         
             public Data(LoadingCanvas loadingCanvas)

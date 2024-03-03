@@ -23,6 +23,7 @@ namespace StellarArchive
                 _clipMap.Add(clip.name, clip);
         }
 
+#if STELLARARCHIVE_UNITASK_SUPPORT
         public async UniTask StartAsync()
         {
             _canvas.enabled = true;
@@ -61,5 +62,6 @@ namespace StellarArchive
             
             _canvas.enabled = false;
         }
+#endif
     }
 }
