@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Serialization;
+
+#if STELLARARCHIVE_UNITASK_SUPPORT
+using Cysharp.Threading.Tasks;
+#endif
 
 namespace StellarArchive
 {
