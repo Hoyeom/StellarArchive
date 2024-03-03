@@ -2,7 +2,9 @@
 	"name": "StellarArchive",
 	"rootNamespace": "",
 	"references": [
-		"UniTask"
+		"UniTask",
+		"Unity.ResourceManager",
+		"Unity.Addressables"
 	],
 	"includePlatforms": [],
 	"excludePlatforms": [],
@@ -26,6 +28,11 @@
 			"name": "com.cysharp.unitask",
 			"expression": "",
 			"define": "STELLARARCHIVE_UNITASK_SUPPORT"
+		},
+		{
+			"name": "com.unity.addressables",
+			"expression": "",
+			"define": "STELLARARCHIVE_ADDRESSABLE_SUPPORT"
 		}
 	],
 	"noEngineReferences": false

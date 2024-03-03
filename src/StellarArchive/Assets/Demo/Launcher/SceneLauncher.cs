@@ -6,11 +6,10 @@ using UnityEngine;
 
 public class SceneLauncher : BaseScene
 {
-    protected override async UniTaskVoid InitializeAsync()
+    // ReSharper disable once Unity.IncorrectMethodSignature
+    protected async UniTaskVoid Start()
     {
-        await UniTask.Delay(2000, false, PlayerLoopTiming.Update, CancellationToken);
-        Debug.Log("Loading Start");
-        await LoadSceneAsync<SceneAssetLoad>("SceneLauncher");
-        Debug.Log("Loading End");
+        await Loading.StartAnimationAsync(0);
+        await LoadSceneAsync<SceneAssetLoad>();
     }
 }

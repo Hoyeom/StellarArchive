@@ -6,10 +6,9 @@ using UnityEngine;
 
 public class SceneAssetLoad : BaseScene
 {
-    protected override async UniTaskVoid InitializeAsync()
+    protected override async UniTaskVoid InitializeAsync(object data)
     {
-        await UniTask.Delay(1000, false, PlayerLoopTiming.Update, CancellationToken);
-        
+        await Loading.EndAnimationAsync(0);
         await LoadSceneAsync<SceneLauncher>();
     }
 }

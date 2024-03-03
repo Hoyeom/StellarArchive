@@ -14,42 +14,25 @@ namespace StellarArchive
     public abstract class BaseScene : MonoBehaviour
     {
         protected CancellationToken CancellationToken;
-        private const string TemporarySceneName = "TemporaryScene";
-        private object _data;
         
         private void Awake()
         {
             CancellationToken = gameObject.GetCancellationTokenOnDestroy();
         }
 
-        private void Start()
-        {
-            InitializeAsync();
-        }
-
-        protected abstract UniTaskVoid InitializeAsync();
-
+        protected virtual UniTaskVoid InitializeAsync(object data) { return default; }
+        
         protected async UniTask LoadSceneAsync<T>(LoadSceneMode loadSceneMode = LoadSceneMode.Single) where T : BaseScene 
             => await LoadSceneAsync<T>(null, loadSceneMode);
-
+        
         protected async UniTask LoadSceneAsync<T>(object data, LoadSceneMode loadSceneMode = LoadSceneMode.Single) where T : BaseScene
         {
-            var prevSceneName = GetType().Name;
             var nextSceneName = typeof(T).Name;
 
-            if (loadSceneMode == LoadSceneMode.Single)
-            {
-                SceneManager.CreateScene(TemporarySceneName);
-                await SceneManager.UnloadSceneAsync(prevSceneName);
-                await SceneManager.LoadSceneAsync(nextSceneName, loadSceneMode);
-            }
-            else
-            {
-                await SceneManager.LoadSceneAsync(nextSceneName, loadSceneMode);
-            }
+            await SceneManager.LoadSceneAsync(nextSceneName, loadSceneMode);
             
             var baseScene = FindObjectOfType<T>();
-            baseScene._data = data;
+            baseScene.InitializeAsync(data);
 #if UNITY_EDITOR
             Debug.Log($"[LoadSceneAsync] {nextSceneName}".FormatColoredString(Color.cyan));
 #endif
