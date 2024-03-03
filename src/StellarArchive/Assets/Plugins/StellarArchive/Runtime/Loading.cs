@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using Cysharp.Threading.Tasks;
 using Object = UnityEngine.Object;
 
 #if STELLARARCHIVE_ADDRESSABLE_SUPPORT
 using UnityEngine.AddressableAssets;
+#endif
+
+#if STELLARARCHIVE_UNITASK_SUPPORT
+using Cysharp.Threading.Tasks;
 #endif
 
 namespace StellarArchive
