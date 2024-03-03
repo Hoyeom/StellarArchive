@@ -36,6 +36,7 @@ namespace StellarArchive
         
         private static LoadingSetting _loadingSetting;
         private static Dictionary<int, Data> _loadingDataMap;
+#if STELLARARCHIVE_UNITASK_SUPPORT
         
         public static async UniTask StartAnimationAsync(Enum key)
         {
@@ -77,5 +78,7 @@ namespace StellarArchive
                 _loadingDataMap[key].Status = Status.Completed;
             }
         }
+#endif
+
     }
 }
