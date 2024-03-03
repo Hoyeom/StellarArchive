@@ -5,6 +5,7 @@
         "UniTask",
         "Unity.TextMeshPro",
         "Unity.TextMeshPro.Editor",
+        "Unity.Addressables.Editor",
         "StellarArchive"
     ],
     "includePlatforms": [
@@ -21,6 +22,11 @@
             "name": "com.unity.textmeshpro",
             "expression": "",
             "define": "STELLARARCHIVE_TEXTMESHPRO_SUPPORT"
+        },
+        {
+            "name": "com.unity.addressables",
+            "expression": "",
+            "define": "STELLARARCHIVE_ADDRESSABLE_SUPPORT"
         }
     ],
     "noEngineReferences": false
