@@ -9,12 +9,17 @@ using UnityEngine;
 
 namespace StellarArchive.Editor
 {
+    [InitializeOnLoad]
     public class DependencyInstaller : AssetPostprocessor
     {
+
+        static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths, bool didDomainReload)
+        {
+            CreateScriptableObject();
+        }
         static DependencyInstaller()
         {
             TryInstallPackage("com.unity.addressables");
-            CreateScriptableObject();
         }
         
     
