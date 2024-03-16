@@ -115,7 +115,11 @@ namespace StellarArchive.Editor
 
                 Debug.Log("LoadingSetting ScriptableObject가 생성되었습니다.");
             }
+            
 #if STELLARARCHIVE_ADDRESSABLE_SUPPORT
+            // TODO Debug
+            return;
+            
             string assetPath = AssetDatabase.GetAssetPath(asset);
             var settings = AddressableAssetSettingsDefaultObject.Settings;
             var groupName = nameof(StellarArchive);
