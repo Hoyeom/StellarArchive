@@ -117,9 +117,6 @@ namespace StellarArchive.Editor
             }
             
 #if STELLARARCHIVE_ADDRESSABLE_SUPPORT
-            // TODO Debug
-            return;
-            
             string assetPath = AssetDatabase.GetAssetPath(asset);
             var settings = AddressableAssetSettingsDefaultObject.Settings;
             var groupName = nameof(StellarArchive);
@@ -149,7 +146,7 @@ namespace StellarArchive.Editor
             }
 
             group = settings.CreateGroup(groupName, false, false, true, null);
-
+            AssetDatabase.Refresh();
             Debug.Log($"Addressable Asset Group '{groupName}' created.");
             return true;
         }
