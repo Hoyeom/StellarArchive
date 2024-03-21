@@ -15,6 +15,7 @@ namespace StellarArchive
         [SerializeField] private Animator _animator;
         private Dictionary<string, AnimationClip> _clipMap;
         private static readonly int End = Animator.StringToHash("End");
+        
         private const string StartStateName = "Start";
         private const string ProgressStateName = "Progress";
         private const string EndStateName = "End";
@@ -45,18 +46,16 @@ namespace StellarArchive
         {
             _canvas.enabled = true;
             AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
+            
             float totalLength = stateInfo.length;
 
             float currentProgressTime = stateInfo.normalizedTime % 1.0f;
 
             float currentTime = totalLength * currentProgressTime;
 
-            float remainingTime = totalLength - currentTime;
-            
-            
             _animator.SetTrigger(End);
             var t = 0f;
-            var duration = _clipMap[EndStateName].length + remainingTime;
+            var duration = _clipMap[EndStateName].length + currentTime;
             while (duration > t)
             {
                 t += Time.deltaTime;
