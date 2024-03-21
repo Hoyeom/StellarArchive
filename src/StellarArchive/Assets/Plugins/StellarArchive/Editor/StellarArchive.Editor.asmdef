@@ -6,7 +6,8 @@
         "Unity.TextMeshPro",
         "Unity.TextMeshPro.Editor",
         "Unity.Addressables.Editor",
-        "StellarArchive"
+        "StellarArchive",
+        "Unity.EditorCoroutines.Editor"
     ],
     "includePlatforms": [
         "Editor"

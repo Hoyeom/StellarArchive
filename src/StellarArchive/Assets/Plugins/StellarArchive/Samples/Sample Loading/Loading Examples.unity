@@ -236,6 +236,7 @@ GameObject:
   - component: {fileID: 997392806}
   - component: {fileID: 997392808}
   - component: {fileID: 997392807}
+  - component: {fileID: 997392809}
   m_Layer: 5
   m_Name: Image
   m_TagString: Untagged
@@ -282,9 +283,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 7c45ca3471b87db4abe260729c2562c2, type: 3}
+  m_Sprite: {fileID: 21300000, guid: f2ed27d6c1c3ccc48959bcca269d88f0, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -300,6 +301,26 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 997392805}
   m_CullTransparentMesh: 1
+--- !u!114 &997392809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 997392805}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da955bec04fff4e12b92340d803605d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _image: {fileID: 997392807}
+  _sprites:
+  - {fileID: 21300000, guid: f2ed27d6c1c3ccc48959bcca269d88f0, type: 3}
+  - {fileID: 21300002, guid: f2ed27d6c1c3ccc48959bcca269d88f0, type: 3}
+  - {fileID: 21300004, guid: f2ed27d6c1c3ccc48959bcca269d88f0, type: 3}
+  - {fileID: 21300006, guid: f2ed27d6c1c3ccc48959bcca269d88f0, type: 3}
+  _delay: 0.08
+  _editorDelay: 0.08
 --- !u!1 &1374905636
 GameObject:
   m_ObjectHideFlags: 0
@@ -316,7 +337,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1374905637
 MonoBehaviour:
   m_ObjectHideFlags: 0
