@@ -5,13 +5,15 @@ using UnityEngine.UI;
 
 namespace StellarArchive
 {
+    [RequireComponent(typeof(Image))]
     [DisallowMultipleComponent]
     public class ImageSpriteAnimator : MonoBehaviour
     {
-        [SerializeField] private Image _image;
+        [HideInInspector] [SerializeField] private Image _image;
         [SerializeField] private Sprite[] _sprites;
         [SerializeField] private float _delay = 0.08f;
-
+        [SerializeField] private bool _repeat = true;
+        
         private CancellationTokenSource _cancellationTokenSource;
 
         private int _currentIndex;
@@ -36,7 +38,6 @@ namespace StellarArchive
         public void SetSprites(Sprite[] sprites, float delay)
         {
             _sprites = sprites;
-            _currentIndex = 0;
             _delay = delay;
             
             UpdateChangeNextSpriteAsync().Forget();
@@ -45,8 +46,12 @@ namespace StellarArchive
         
         private async UniTaskVoid UpdateChangeNextSpriteAsync()
         {
+            _currentIndex = 0;
             var milliSecondsDelay = Mathf.RoundToInt(_delay * 1000f);
 
+            var lastIndex = _sprites.Length - 1;
+            
+            _image.enabled = true;
             if (milliSecondsDelay > 0)
             {
                 Dispose();
@@ -56,9 +61,13 @@ namespace StellarArchive
                 while (true)
                 {
                     await UniTask.Delay(milliSecondsDelay, false, PlayerLoopTiming.Update, cancellationToken);
+                    if (!_repeat && _currentIndex == lastIndex)
+                        break;
                     ChangeNextSprite();
-                }   
+                }
             }
+
+            _image.enabled = false;
         }
         
         public void ChangeNextSprite()
