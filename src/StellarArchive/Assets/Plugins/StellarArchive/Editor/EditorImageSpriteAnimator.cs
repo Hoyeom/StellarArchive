@@ -14,7 +14,8 @@ namespace StellarArchive
         {
             base.OnInspectorGUI();
 
-  
+            if (Application.isPlaying)
+                return;
             
             if (GUILayout.Button("Play"))
             {

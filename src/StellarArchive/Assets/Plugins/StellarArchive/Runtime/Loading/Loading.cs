@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Object = UnityEngine.Object;
 
@@ -62,7 +63,7 @@ namespace StellarArchive
             {
                 var prefab = _loadingSetting.loadingCanvasPrefab[key];
                 var loadingCanvas = Object.Instantiate(prefab);
-                Object.DontDestroyOnLoad(loadingCanvas.gameObject);
+                Object.DontDestroyOnLoad(loadingCanvas.gameObject); 
                 _loadingDataMap.Add(key, new Data(loadingCanvas));
             }
 

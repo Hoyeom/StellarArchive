@@ -36,7 +36,7 @@ namespace StellarArchive
             var duration = _clipMap[StartStateName].length;
             while (duration > t)
             {
-                t += Time.deltaTime;
+                t += Time.unscaledDeltaTime;
                 await UniTask.Yield(PlayerLoopTiming.Update);
             }
             _animator.Play(ProgressStateName, -1, 0);
@@ -58,7 +58,7 @@ namespace StellarArchive
             var duration = _clipMap[EndStateName].length + currentTime;
             while (duration > t)
             {
-                t += Time.deltaTime;
+                t += Time.unscaledDeltaTime;
                 await UniTask.Yield(PlayerLoopTiming.Update);
             }
             

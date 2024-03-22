@@ -13,6 +13,7 @@ namespace StellarArchive
         [SerializeField] private Sprite[] _sprites;
         [SerializeField] private float _delay = 0.08f;
         [SerializeField] private bool _repeat = true;
+        [SerializeField] private bool _ignoreTimeScale = false;
         
         private CancellationTokenSource _cancellationTokenSource;
 
@@ -27,7 +28,9 @@ namespace StellarArchive
         {
             Dispose();
         }
-
+        
+        public float GetDelay() => _delay;
+        
         private void Dispose()
         {
             _cancellationTokenSource?.Cancel();
@@ -60,7 +63,7 @@ namespace StellarArchive
                 
                 while (true)
                 {
-                    await UniTask.Delay(milliSecondsDelay, false, PlayerLoopTiming.Update, cancellationToken);
+                    await UniTask.Delay(milliSecondsDelay, _ignoreTimeScale, PlayerLoopTiming.Update, cancellationToken);
                     if (!_repeat && _currentIndex == lastIndex)
                         break;
                     ChangeNextSprite();
@@ -86,8 +89,6 @@ namespace StellarArchive
         {
             _image ??= GetComponent<Image>();
         }
-
-        public float GetDelay() => _delay;
 #endif
     }
 }
