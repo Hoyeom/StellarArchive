@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace StellarArchive.Sample
 {
-    public class DemoLoading : MonoBehaviour
+    public class SampleLoading : MonoBehaviour
     {
         // ReSharper disable once Unity.IncorrectMethodSignature
         private async UniTaskVoid Start()

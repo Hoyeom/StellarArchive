@@ -1,5 +1,5 @@
 {
-    "name": "StellarArchive.Sample.Loading",
+    "name": "StellarArchive.Sample.TouchEffect",
     "rootNamespace": "",
     "references": [
         "StellarArchive",
