@@ -8,7 +8,6 @@ namespace StellarArchive.Sample
         // ReSharper disable once Unity.IncorrectMethodSignature
         private async UniTaskVoid Start()
         {
-            Time.timeScale = 0;
             while (true)
             {
                 await Loading.StartAnimationAsync(0);

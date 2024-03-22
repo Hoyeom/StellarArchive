@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -14,6 +15,8 @@ namespace StellarArchive
         [SerializeField] private Canvas _canvas;
         [SerializeField] private Animator _animator;
         private Dictionary<string, AnimationClip> _clipMap;
+        private CancellationToken _cancellationToken;
+        
         private static readonly int End = Animator.StringToHash("End");
         
         private const string StartStateName = "Start";
@@ -22,6 +25,7 @@ namespace StellarArchive
         
         private void Awake()
         {
+            _cancellationToken = gameObject.GetCancellationTokenOnDestroy();
             _clipMap = new Dictionary<string, AnimationClip>();
             foreach (var clip in _animator.runtimeAnimatorController.animationClips)
                 _clipMap.Add(clip.name, clip);
@@ -37,7 +41,7 @@ namespace StellarArchive
             while (duration > t)
             {
                 t += Time.unscaledDeltaTime;
-                await UniTask.Yield(PlayerLoopTiming.Update);
+                await UniTask.Yield(PlayerLoopTiming.Update, _cancellationToken);
             }
             _animator.Play(ProgressStateName, -1, 0);
         }
@@ -59,7 +63,7 @@ namespace StellarArchive
             while (duration > t)
             {
                 t += Time.unscaledDeltaTime;
-                await UniTask.Yield(PlayerLoopTiming.Update);
+                await UniTask.Yield(PlayerLoopTiming.Update, _cancellationToken);
             }
             
             _canvas.enabled = false;
