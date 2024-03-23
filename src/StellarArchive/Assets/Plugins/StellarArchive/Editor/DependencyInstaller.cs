@@ -17,6 +17,7 @@ namespace StellarArchive.Editor
     {
         private static readonly string ManifestFilePath = Path.Combine(Application.dataPath, "../Packages/manifest.json");
         private static readonly string UniTaskGitUrl = "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask";
+        private static readonly string UnMaskGitUrl = "https://github.com/mob-sakai/UnmaskForUGUI.git";
 
         static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths, bool didDomainReload)
         {
@@ -25,6 +26,7 @@ namespace StellarArchive.Editor
         static DependencyInstaller()
         {
             InstallUniTask();
+            InstallUnMask();
             TryInstallPackage("com.unity.addressables");
         }
         
@@ -67,6 +69,37 @@ namespace StellarArchive.Editor
             }
         }
 
+        public static void InstallUnMask()
+        {
+            if (!File.Exists(ManifestFilePath))
+            {
+                Debug.LogError("manifest.json not found.");
+                return;
+            }
+
+            string manifestContent = File.ReadAllText(ManifestFilePath);
+            var manifestJson = JObject.Parse(manifestContent);
+
+            var dependencies = (JObject) manifestJson["dependencies"];
+            if (dependencies == null)
+            {
+                Debug.LogError("Dependencies not found in manifest.json.");
+                return;
+            }
+
+            if (dependencies.ContainsKey("com.coffee.unmask"))
+            {
+                // Debug.Log("UniTask is already installed.");
+                return;
+            }
+
+            dependencies["com.coffee.unmask"] = UnMaskGitUrl;
+            File.WriteAllText(ManifestFilePath, manifestJson.ToString());
+
+            Debug.Log("UnMask installed successfully.");
+            AssetDatabase.Refresh();
+        }
+        
         public static void InstallUniTask()
         {
             if (!File.Exists(ManifestFilePath))

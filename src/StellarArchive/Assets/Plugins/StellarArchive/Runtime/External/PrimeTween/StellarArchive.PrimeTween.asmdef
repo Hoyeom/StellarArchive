@@ -1,0 +1,25 @@
+{
+    "name": "StellarArchive.PrimeTween",
+    "rootNamespace": "",
+    "references": [
+        "UniTask",
+        "Unity.ResourceManager",
+        "Unity.Addressables",
+        "PrimeTween.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.kyrylokuzyk.primetween",
+            "expression": "",
+            "define": "STELLARARCHIVE_PRIMETWEEN_SUPPORT"
+        }
+    ],
+    "noEngineReferences": false
+}
