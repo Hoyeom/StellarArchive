@@ -19,6 +19,11 @@
             "name": "com.kyrylokuzyk.primetween",
             "expression": "",
             "define": "STELLARARCHIVE_PRIMETWEEN_SUPPORT"
+        },
+        {
+            "name": "Select...",
+            "expression": "",
+            "define": "STELLARARCHIVE_PRIMETWEEN_SUPPORT"
         }
     ],
     "noEngineReferences": false

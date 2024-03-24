@@ -15,9 +15,9 @@ MonoBehaviour:
   m_GroupName: StellarArchive
   m_Data:
     m_SerializedData: []
-  m_GUID: 0e1dfedb6584700429f2be0739d11308
+  m_GUID: 16d5e2ffe7c2323429db078950ee7368
   m_SerializeEntries:
-  - m_GUID: 1fb7b419e07ed5749b1d15066734b538
+  - m_GUID: cbf9992d3f974e147aa9dfc34c46ebc0
     m_Address: LoadingSetting
     m_ReadOnly: 0
     m_SerializedLabels: []
@@ -25,6 +25,4 @@ MonoBehaviour:
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: afda6d2c4d900f54f8d4253fc8278d61, type: 2}
   m_SchemaSet:
-    m_Schemas:
-    - {fileID: 11400000, guid: b4071a6d4b03d444390275784cc66a98, type: 2}
-    - {fileID: 11400000, guid: 2431e58d224d3924ea8bbafb958384b8, type: 2}
+    m_Schemas: []

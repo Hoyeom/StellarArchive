@@ -25,7 +25,9 @@ namespace StellarArchive
         
         private void Awake()
         {
+#if STELLARARCHIVE_UNITASK_SUPPORT
             _cancellationToken = gameObject.GetCancellationTokenOnDestroy();
+#endif
             _clipMap = new Dictionary<string, AnimationClip>();
             foreach (var clip in _animator.runtimeAnimatorController.animationClips)
                 _clipMap.Add(clip.name, clip);

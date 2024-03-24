@@ -1,16 +1,19 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Cysharp.Threading.Tasks;
 using PrimeTween;
 using UnityEngine;
 using UnityEngine.UI;
+
+#if STELLARARCHIVE_UNITASK_SUPPORT
+using Cysharp.Threading.Tasks;
+#endif
 
 public class TestPrimeTween : MonoBehaviour
 {
     [SerializeField] private Image[] _images;
  
-#if STELLARARCHIVE_PRIMETWEEN_SUPPORT
+#if STELLARARCHIVE_PRIMETWEEN_SUPPORT && STELLARARCHIVE_UNITASK_SUPPORT
 
     private async UniTaskVoid Start()
     {

@@ -9,8 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5834b5087d578d24c926ce20cd31e6d6, type: 3}
-  m_Name: StellarArchive_ContentUpdateGroupSchema
+  m_Script: {fileID: 11500000, guid: 661dcf0e0108475482946e9453ba4328, type: 3}
+  m_Name: LoadingSetting
   m_EditorClassIdentifier: 
-  m_Group: {fileID: 11400000, guid: 98651fc2e78b84c47974701c41bf51c2, type: 2}
-  m_StaticContent: 0
+  loadingCanvasPrefab: []

@@ -1,7 +1,10 @@
 using System.Threading;
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
+
+#if STELLARARCHIVE_UNITASK_SUPPORT
+using Cysharp.Threading.Tasks;
+#endif
 
 namespace StellarArchive
 {
@@ -21,7 +24,9 @@ namespace StellarArchive
         
         private void OnEnable()
         {
+#if STELLARARCHIVE_UNITASK_SUPPORT
             UpdateChangeNextSpriteAsync().Forget();
+#endif
         }
 
         private void OnDisable()
@@ -42,11 +47,12 @@ namespace StellarArchive
         {
             _sprites = sprites;
             _delay = delay;
-            
+#if STELLARARCHIVE_UNITASK_SUPPORT
             UpdateChangeNextSpriteAsync().Forget();
+#endif
         }
 
-        
+#if STELLARARCHIVE_UNITASK_SUPPORT
         private async UniTaskVoid UpdateChangeNextSpriteAsync()
         {
             _currentIndex = 0;
@@ -72,7 +78,8 @@ namespace StellarArchive
 
             _image.enabled = false;
         }
-        
+#endif
+
         public void ChangeNextSprite()
         {
             _currentIndex = (_currentIndex + 1) % _sprites.Length;
@@ -83,7 +90,7 @@ namespace StellarArchive
                 _image.sprite = nextSprite;
             }
         }
-
+        
 #if UNITY_EDITOR
         private void OnValidate()
         {
