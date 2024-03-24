@@ -1,10 +1,7 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using Unity.Plastic.Newtonsoft.Json.Linq;
 using UnityEditor;
-using UnityEditor.Callbacks;
-using UnityEditor.PackageManager;
 using UnityEngine;
 
 #if STELLARARCHIVE_ADDRESSABLE_SUPPORT
