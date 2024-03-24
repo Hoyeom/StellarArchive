@@ -11,9 +11,11 @@ public class SceneInGame : BaseScene
 
     protected override async UniTaskVoid InitializeAsync(object data)
     {
-        var nav = new NavCanvas();
+        var nav = new UINav();
 
         var canvas = await nav.GetAsync<AuthCanvas>();
         
+        canvas.TryOpen();
+        // canvas.SetVisible(true);
     }
 }
