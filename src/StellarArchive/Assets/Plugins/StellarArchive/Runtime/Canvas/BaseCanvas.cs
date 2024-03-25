@@ -87,7 +87,7 @@ public abstract class BaseCanvas : MonoBehaviour
         _canvas.worldCamera = cam;
     }
     
-    public void SetOrder(int order)
+    internal void SetOrder(int order)
     {
         _canvas.sortingOrder = order;
     }
