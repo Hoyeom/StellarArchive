@@ -15,7 +15,6 @@ public class SceneInGame : BaseScene
         var nav = new UINav();
 
         var canvas = await nav.GetAsync<TestCanvas>();
-        // await nav.GetAsync<PopupTestCanvas>();
         canvas.TryOpenAsync().Forget();
 
         nav.RegisterAccessCondition<PopupTestCanvas>(new AccessCondition(0,
