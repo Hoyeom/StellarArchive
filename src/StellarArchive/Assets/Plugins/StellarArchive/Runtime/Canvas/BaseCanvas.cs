@@ -11,21 +11,21 @@ public abstract class BaseCanvas : MonoBehaviour
 {
     private Canvas _canvas;
     private CanvasScaler _canvasScaler;
+    
     [SerializeField] private CanvasType _canvasType;
+    
+    private string _key;
+    private IActivationHandler _activationHandler;
     public bool Fixed { get; private set; } = false;
     public CanvasType Type => _canvasType;
 
     public CanvasStatus Status { get; protected set; }
 
-    internal delegate bool TryCloseHandler(BaseCanvas baseCanvas);
-    internal delegate bool TryOpenHandler(BaseCanvas baseCanvas);
-    internal event TryCloseHandler OnTryOpen; 
-    internal event TryOpenHandler OnTryClose; 
-    
     private void Awake()
     {
         _canvas = GetComponent<Canvas>();
         _canvasScaler = GetComponent<CanvasScaler>();
+        _key = GetType().Name;
     }
 
     public void SetFixed(bool value)
@@ -33,18 +33,14 @@ public abstract class BaseCanvas : MonoBehaviour
         Fixed = value;
     }
 
-    public bool TryOpen()
+    public async UniTask<bool> TryOpenAsync()
     {
-        if (OnTryOpen != null)
-            return OnTryOpen.Invoke(this);
-        return false;
+        return await _activationHandler.OnTryOpenAsync(_key);
     }
     
-    public bool TryClose()
+    public async UniTask<bool> TryCloseAsync()
     {
-        if (OnTryClose != null)
-            return OnTryClose.Invoke(this);
-        return false;
+        return await _activationHandler.OnTryCloseAsync(_key);
     }
 
     internal void Open()
@@ -58,6 +54,16 @@ public abstract class BaseCanvas : MonoBehaviour
         _canvas.enabled = false;
         Status = CanvasStatus.Close;
     }
+
+    public void TryOpenAsyncForget(string canvasName = null)
+    {
+        _activationHandler.OnTryOpenAsync(string.IsNullOrWhiteSpace(canvasName) ? _key : canvasName);
+    }
+    
+    public void TryCloseAsyncForget()
+    {
+        _activationHandler.OnTryCloseAsync(_key);
+    }
     
     internal async virtual UniTaskVoid OpenAsync()
     {
@@ -70,10 +76,25 @@ public abstract class BaseCanvas : MonoBehaviour
         _canvas.enabled = false;
         Status = CanvasStatus.Close;
     }
+
+    internal void SetRenderMode(RenderMode renderMode)
+    {
+        _canvas.renderMode = renderMode;
+    }
     
     internal void SetCamera(Camera cam)
     {
         _canvas.worldCamera = cam;
+    }
+    
+    public void SetOrder(int order)
+    {
+        _canvas.sortingOrder = order;
+    }
+
+    internal void Setup(IActivationHandler activationHandler)
+    {
+        _activationHandler = activationHandler;
     }
     
 #if UNITY_EDITOR
@@ -90,4 +111,5 @@ public abstract class BaseCanvas : MonoBehaviour
         _canvasScaler.matchWidthOrHeight = .5f;
     }
 #endif
+
 }

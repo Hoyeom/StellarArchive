@@ -18,7 +18,12 @@ MonoBehaviour:
   m_GUID: 80a2ed9692bc9f34aaa185a0e2190c5c
   m_SerializeEntries:
   - m_GUID: 80924a432bc41e94094cd8e1018513fc
-    m_Address: AuthCanvas
+    m_Address: TestCanvas
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 85f3ae7b0330941169fe3723c373379c
+    m_Address: PopupTestCanvas
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
