@@ -13,19 +13,20 @@ public class SceneInGame : BaseScene
     protected override async UniTaskVoid InitializeAsync(object data)
     {
         var nav = new UINav();
-
+        
+        nav.RegisterAccessCondition<ScreenTestCanvas>(new AccessCondition(0, () =>
+        {
+            if (Input.GetKey(KeyCode.A))
+            {
+                return true;
+            }
+            // TODO Toast
+            Debug.Log("A 키를 누른 후 열수 있습니다");
+            return false;
+        }));
+        
+        
         var canvas = await nav.GetAsync<TestCanvas>();
         canvas.TryOpenAsync().Forget();
-
-        nav.RegisterAccessCondition<PopupTestCanvas>(new AccessCondition(0,
-            () =>
-            {
-                // Ex 특정 레벨 달성
-                if(!Input.GetKey(KeyCode.N))
-                    Debug.Log("N 눌러야함");
-                return Input.GetKey(KeyCode.N);
-            }));
-
-        // canvas.SetVisible(true);
     }
 }

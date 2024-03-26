@@ -1,18 +1,28 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
 public class UINav : IActivationHandler
 {
+    public delegate void SetupHandler<T>(T baseCanvas) where T : BaseCanvas;
+
     private readonly Dictionary<string, BaseCanvas> _cachedCanvas = new Dictionary<string, BaseCanvas>();
     private readonly Stack<BaseCanvas> _canvasStack = new Stack<BaseCanvas>();
     private readonly Dictionary<string, SortedSet<AccessCondition>> _accessConditionsMap = new Dictionary<string, SortedSet<AccessCondition>>();
+    private readonly Dictionary<string, object> _setupMap = new Dictionary<string, object>();
     private readonly HashSet<string> _canvasesInSetup = new HashSet<string>();
-        
+    
     public UINav()
     {
         
+    }
+
+    public void RegisterSetup<T>(SetupHandler<T> setup) where T : BaseCanvas
+    {
+        var key = typeof(T).Name;
+        _setupMap.Add(key, setup);
     }
 
     public void RegisterAccessCondition<T>(AccessCondition accessCondition) where T : BaseCanvas
@@ -70,16 +80,21 @@ public class UINav : IActivationHandler
         return baseCanvas as T;
     }
 
-    private void Setup<T>(string key,T baseCanvas) where T : BaseCanvas
+    private void Setup<T>(string key,T canvas) where T : BaseCanvas
     {
-        baseCanvas.Close();
-        baseCanvas.SetCamera(Camera.main);
-        baseCanvas.Setup(this);
+        canvas.Close();
+        canvas.SetCamera(Camera.main);
+        canvas.Setup(this);
+        if (_setupMap.TryGetValue(key, out var value) && value is SetupHandler<T> handler)
+        {
+            handler.Invoke(canvas);
+        }
+
 #if UNITY_EDITOR
-        baseCanvas.name = key;
+        canvas.name = key;
 #endif
-        
-        _cachedCanvas.Add(key, baseCanvas);
+        _setupMap.Remove(key);
+        _cachedCanvas.Add(key, canvas);
     }
 
     async UniTask<bool> IActivationHandler.OnTryOpenAsync(string key)
@@ -133,10 +148,7 @@ public class UINav : IActivationHandler
         
         if (canvas.Fixed)
             return false;
-
-        if (_canvasStack.TryPeek(out var result) && !result.Equals(canvas))
-            return false;
-         
+        
         _canvasStack.Pop();
         
         canvas.CloseAsync().Forget();
