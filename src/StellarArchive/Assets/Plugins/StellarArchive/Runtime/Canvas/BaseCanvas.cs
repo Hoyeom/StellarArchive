@@ -1,10 +1,10 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
+namespace StellarArchive
+{
+    
 [RequireComponent(typeof(Canvas))]
 [DisallowMultipleComponent]
 public abstract class BaseCanvas : MonoBehaviour
@@ -112,4 +112,5 @@ public abstract class BaseCanvas : MonoBehaviour
     }
 #endif
 
+}
 }
