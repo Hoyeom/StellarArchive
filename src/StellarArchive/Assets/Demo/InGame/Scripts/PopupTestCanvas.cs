@@ -1,6 +1,6 @@
 using StellarArchive;
 
-public class PopupTestCanvas : BaseCanvas
+public class PopupTestCanvas : PopupCanvas
 {
     
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.EventSystems;
 
 namespace StellarArchive
 {
@@ -133,6 +134,15 @@ namespace StellarArchive
                 }
             }
 
+            if (canvas is HamburgerCanvas hamburgerCanvas)
+            {
+                if (EventSystem.current.currentSelectedGameObject != null)
+                {
+                    var anchor = (RectTransform)EventSystem.current.currentSelectedGameObject.transform;
+                    hamburgerCanvas.SetInitialPosition(anchor);
+                }
+            }
+            
             canvas.SetOrder(_canvasStack.Count);
             canvas.OpenAsync().Forget();
             _canvasStack.Push(canvas);

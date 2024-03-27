@@ -2,6 +2,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using StellarArchive;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class SceneInGame : BaseScene
 {
@@ -14,19 +15,17 @@ public class SceneInGame : BaseScene
     {
         var nav = new UINav();
         
-        nav.RegisterAccessCondition<ScreenTestCanvas>(new AccessCondition(0, () =>
+        nav.RegisterSetup<ScreenTestCanvas>(canvas =>
         {
-            if (Input.GetKey(KeyCode.A))
-            {
-                return true;
-            }
-            // TODO Toast
-            Debug.Log("A 키를 누른 후 열수 있습니다");
-            return false;
-        }));
+            
+        });
         
+        nav.RegisterAccessCondition<ScreenTestCanvas>(new AccessCondition(0, () => Input.GetKey(KeyCode.A)));
         
         var canvas = await nav.GetAsync<TestCanvas>();
         canvas.TryOpenAsync().Forget();
+        
+        // PointerEventData pointerEventData = new PointerEventData(EventSystem.current);
+        // ExecuteEvents.Execute(buttonGameObject, pointerEventData, ExecuteEvents.pointerClickHandler);
     }
 }

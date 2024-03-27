@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using StellarArchive;
 using UnityEngine;
 
-public class ScreenTestCanvas : BaseCanvas
+public class ScreenTestCanvas : ScreenCanvas
 {
     
 }
