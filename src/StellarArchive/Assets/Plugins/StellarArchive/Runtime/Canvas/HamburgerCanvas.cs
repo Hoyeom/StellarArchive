@@ -15,7 +15,7 @@ namespace StellarArchive
             Input
         }
 
-        [FormerlySerializedAs("_root")] [field: SerializeField] private RectTransform _anchor;
+        [field: SerializeField] private RectTransform _anchor;
 
         [field: SerializeField] public PositionType Type { get; private set; }
         
