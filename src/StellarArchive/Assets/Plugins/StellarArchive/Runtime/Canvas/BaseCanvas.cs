@@ -1,12 +1,13 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace StellarArchive
 {
     [RequireComponent(typeof(Canvas))]
     [DisallowMultipleComponent]
-    public abstract class BaseCanvas : MonoBehaviour
+    public abstract class BaseCanvas : UIBehaviour
     {
         private Canvas _canvas;
         private CanvasScaler _canvasScaler;
@@ -17,7 +18,7 @@ namespace StellarArchive
 
         public CanvasStatus Status { get; protected set; }
 
-        private void Awake()
+        protected override void Awake()
         {
             _canvas = GetComponent<Canvas>();
             _canvasScaler = GetComponent<CanvasScaler>();
@@ -94,7 +95,7 @@ namespace StellarArchive
         }
 
 #if UNITY_EDITOR
-        private void OnValidate()
+        protected override void OnValidate()
         {
             var getCurrentPrefabStage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
 
@@ -104,7 +105,7 @@ namespace StellarArchive
             _canvas = GetComponent<Canvas>();
             _canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             _canvasScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-            _canvasScaler.matchWidthOrHeight = .5f;
+            // _canvasScaler.matchWidthOrHeight = 1f;
         }
 #endif
 
