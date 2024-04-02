@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEngine.Pool;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 namespace StellarArchive
 {
@@ -65,7 +68,10 @@ namespace StellarArchive
         [SerializeField] private ScrollRectEvent _onValueChanged = new ScrollRectEvent();
         [SerializeField] private ScrollbarVisibility _horizontalScrollbarVisibility;
         [SerializeField] private ScrollbarVisibility _verticalScrollbarVisibility;
-
+        [SerializeField] private LayoutGroup _layoutGroup;
+        [SerializeField] private GameObject _testPrefab;
+        [SerializeField] private float _itemHeight;
+        
         protected Vector2 _contentStartPosition = Vector2.zero;
         protected Bounds _contentBounds;
         
@@ -81,9 +87,15 @@ namespace StellarArchive
         private bool _vSliderExpand;
         private float _hSliderHeight;
         private float _vSliderWidth;
+        private int _maxObjectCount;
         private Vector2 _prevPosition = Vector2.zero;
         private Bounds _prevContentBounds;
         private Bounds _prevViewBounds;
+        private List<GameObject> _gameObjects;
+        private Vector2 _contentOffset;
+        private int _itemCount;
+        private int _itemIndex;
+
 
         public virtual float minWidth => -1;
         public virtual float preferredWidth => -1;
@@ -227,7 +239,17 @@ namespace StellarArchive
                 return true;
             }
         }
-        
+
+        protected override void Awake()
+        {
+            if (_content != null)
+            {
+                _layoutGroup = content.GetComponent<LayoutGroup>();
+                _contentOffset = _content.anchoredPosition;
+                _itemIndex = 0;
+            }
+        }
+
         protected override void OnEnable()
         {
             if (_direction is Direction.Horizontal && _horizontalScrollbar)
@@ -243,12 +265,12 @@ namespace StellarArchive
         {
             if (!_content)
                 return;
-
+            
             EnsureLayoutHasRebuilt();
             UpdateBounds();
             float deltaTime = Time.unscaledDeltaTime;
             Vector2 offset = CalculateOffset(Vector2.zero);
-
+            
             if (deltaTime > 0.0f)
             {
                 if (!_dragging && (offset != Vector2.zero || _velocity != Vector2.zero))
@@ -287,7 +309,7 @@ namespace StellarArchive
                         offset = CalculateOffset(position - _content.anchoredPosition);
                         position += offset;
                     }
-
+                    
                     SetContentAnchoredPosition(position);
                 }
 
@@ -305,6 +327,7 @@ namespace StellarArchive
                 _onValueChanged.Invoke(normalizedPosition);
                 UpdatePrevData();
             }
+            
             UpdateScrollbarVisibility();
             _scrolling = false;
         }
@@ -368,11 +391,15 @@ namespace StellarArchive
             float newAnchoredPosition = _content.anchoredPosition[axis] + contentBoundsMinPosition - _contentBounds.min[axis];
 
             Vector3 anchoredPosition = _content.anchoredPosition;
+
+           
+            
             if (Mathf.Abs(anchoredPosition[axis] - newAnchoredPosition) > 0.01f)
             {
                 anchoredPosition[axis] = newAnchoredPosition;
                 _content.anchoredPosition = anchoredPosition;
                 _velocity[axis] = 0;
+
                 UpdateBounds();
             }
         }
@@ -428,10 +455,12 @@ namespace StellarArchive
             UpdateBounds();
 
             var pointerDelta = localCursor - _pointerStartLocalCursor;
-            Vector2 position = _contentStartPosition + pointerDelta;
 
+            Vector2 position = _contentStartPosition + pointerDelta;
+            
             // Offset to get content into place in the view.
             Vector2 offset = CalculateOffset(position - _content.anchoredPosition);
+            
             position += offset;
             if (_movementType == MovementType.Elastic)
             {
@@ -482,7 +511,6 @@ namespace StellarArchive
             _horizontalScrollbarRect = _horizontalScrollbar == null ? null : _horizontalScrollbar.transform as RectTransform;
             _verticalScrollbarRect = _verticalScrollbar == null ? null : _verticalScrollbar.transform as RectTransform;
 
-            // These are true if either the elements are children, or they don't exist at all.
             bool viewIsChild = (viewRect.parent == transform);
             bool hScrollbarIsChild = (!_horizontalScrollbarRect || _horizontalScrollbarRect.parent == transform);
             bool vScrollbarIsChild = (!_verticalScrollbarRect || _verticalScrollbarRect.parent == transform);
@@ -492,8 +520,42 @@ namespace StellarArchive
             _vSliderExpand = allAreChildren && _verticalScrollbarRect && verticalScrollbarVisibility == ScrollbarVisibility.AutoHideAndExpandViewport;
             _hSliderHeight = (_horizontalScrollbarRect == null ? 0 : _horizontalScrollbarRect.rect.height);
             _vSliderWidth = (_verticalScrollbarRect == null ? 0 : _verticalScrollbarRect.rect.width);
+
+            _maxObjectCount = CalculateMaxObjects() + 2;
+            
+            
+            if(!Application.isPlaying) return;
+
+            if(_testPrefab == null) return;
+            
+            if (_gameObjects == null)
+            {
+                _gameObjects = new List<GameObject>();
+            }
+
+            for (int i = _gameObjects.Count; i < _maxObjectCount; i++)
+            {
+                _gameObjects.Add(Instantiate(_testPrefab, content));
+            }
         }
 
+        int CalculateMaxObjects()
+        {
+            if (_layoutGroup is VerticalLayoutGroup verticalLayoutGroup)
+            {
+                float topPadding = verticalLayoutGroup.padding.top;
+                float bottomPadding = verticalLayoutGroup.padding.bottom;
+                float spacing = verticalLayoutGroup.spacing;
+            
+                float totalHeight = ((RectTransform)transform).rect.height - (topPadding + bottomPadding);
+                float totalItemHeight = _itemHeight + spacing;
+                int maxItems = Mathf.CeilToInt(totalHeight / totalItemHeight);
+                return maxItems;
+            }
+            
+            return 0;
+        }
+        
         public void Rebuild(CanvasUpdate executing)
         {
             if (executing == CanvasUpdate.Prelayout)
@@ -582,9 +644,63 @@ namespace StellarArchive
             _viewBounds = new Bounds(viewRect.rect.center, viewRect.rect.size);
             _contentBounds = GetBounds();
         }
-        
+
+        private Vector2 GetLayoutItemSize()
+        {
+            if (_layoutGroup is VerticalLayoutGroup verticalLayoutGroup)
+            {
+                var top = verticalLayoutGroup.padding.top;
+                var spacing = verticalLayoutGroup.spacing;
+                var itemHeight = _itemHeight;
+                var itemOffsetY = itemHeight + spacing;
+
+                return Vector2.up * itemOffsetY;
+            }
+
+            return Vector2.zero;
+        }
+
         protected virtual void SetContentAnchoredPosition(Vector2 position)
         {
+            _itemCount = 100;
+            
+            var layoutItemSize = GetLayoutItemSize();
+            
+            if (position.y > layoutItemSize.y * 2)
+            {
+                if (_itemIndex + 1 < _itemCount)
+                {
+                    _contentOffset += layoutItemSize;
+                    position = layoutItemSize;
+                    _prevPosition -= layoutItemSize;
+
+                    _itemIndex++;
+                    Debug.Log(_itemIndex);
+
+                    if (_dragging)
+                    {
+                        _contentStartPosition -= layoutItemSize;
+                    }
+                }
+            }
+            else if (position.y < layoutItemSize.y)
+            {
+                if (_itemIndex - 1 > -1)
+                {
+                    _contentOffset -= layoutItemSize * 2;
+                    position = layoutItemSize * 2;
+                    _prevPosition += layoutItemSize * 2;
+
+                    _itemIndex--;
+                    Debug.Log(_itemIndex);
+
+                    if (_dragging)
+                    {
+                        _contentStartPosition += layoutItemSize;
+                    }
+                }
+            }
+            
             if (_direction is not Direction.Horizontal)
                 position.x = _content.anchoredPosition.x;
             if (_direction is not Direction.Vertical)
@@ -689,11 +805,14 @@ namespace StellarArchive
 
             CanvasUpdateRegistry.RegisterCanvasElementForLayoutRebuild(this);
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
-
+            
+            // ListPool<Component>.Get();
+            // LayoutUtility.GetPreferredSize(_content, 1);
+            
             _viewRect = null;
         }
         
-        protected void UpdateBounds()
+        private void UpdateBounds()
         {
             _viewBounds = new Bounds(viewRect.rect.center, viewRect.rect.size);
             _contentBounds = GetBounds();
@@ -708,12 +827,8 @@ namespace StellarArchive
             _contentBounds.size = contentSize;
             _contentBounds.center = contentPos;
 
-            if (movementType == MovementType.Clamped)
+            if (_movementType == MovementType.Clamped)
             {
-                // Adjust content so that content bounds bottom (right side) is never higher (to the left) than the view bounds bottom (right side).
-                // top (left side) is never lower (to the right) than the view bounds top (left side).
-                // All this can happen if content has shrunk.
-                // This works because content size is at least as big as view size (because of the call to InternalUpdateBounds above).
                 Vector2 delta = Vector2.zero;
                 if (_viewBounds.max.x > _contentBounds.max.x)
                 {
@@ -735,10 +850,15 @@ namespace StellarArchive
                 if (delta.sqrMagnitude > float.Epsilon)
                 {
                     contentPos = _content.anchoredPosition + delta;
-                    // if (!m_Horizontal)
-                        // contentPos.x = _content.anchoredPosition.x;
-                    // if (!m_Vertical)
+
+                    if (direction is Direction.Horizontal)
+                    {
+                        contentPos.x = _content.anchoredPosition.x;
+                    }
+                    else
+                    {
                         contentPos.y = _content.anchoredPosition.y;
+                    }
                     AdjustBounds(ref _viewBounds, ref contentPivot, ref contentSize, ref contentPos);
                 }
             }
@@ -751,6 +871,7 @@ namespace StellarArchive
                 return new Bounds();
             _content.GetWorldCorners(_corners);
             var viewWorldToLocalMatrix = viewRect.worldToLocalMatrix;
+            
             return InternalGetBounds(_corners, ref viewWorldToLocalMatrix);
         }
 
