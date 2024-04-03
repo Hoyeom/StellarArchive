@@ -1,39 +1,45 @@
 {
-	"name": "StellarArchive",
-	"rootNamespace": "",
-	"references": [
-		"UniTask",
-		"Unity.ResourceManager",
-		"Unity.Addressables"
-	],
-	"includePlatforms": [],
-	"excludePlatforms": [],
-	"allowUnsafeCode": false,
-	"overrideReferences": false,
-	"precompiledReferences": [],
-	"autoReferenced": true,
-	"defineConstraints": [],
-	"versionDefines": [
-		{
-			"name": "com.unity.ugui",
-			"expression": "",
-			"define": "STELLARARCHIVE_UGUI_SUPPORT"
-		},
-		{
-			"name": "com.unity.modules.unitywebrequest",
-			"expression": "",
-			"define": "STELLARARCHIVE_WEBREQUEST_SUPPORT"
-		},
-		{
-			"name": "com.cysharp.unitask",
-			"expression": "",
-			"define": "STELLARARCHIVE_UNITASK_SUPPORT"
-		},
-		{
-			"name": "com.unity.addressables",
-			"expression": "",
-			"define": "STELLARARCHIVE_ADDRESSABLE_SUPPORT"
-		}
-	],
-	"noEngineReferences": false
+    "name": "StellarArchive",
+    "rootNamespace": "",
+    "references": [
+        "UniTask",
+        "Unity.ResourceManager",
+        "Unity.Addressables",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.ugui",
+            "expression": "",
+            "define": "STELLARARCHIVE_UGUI_SUPPORT"
+        },
+        {
+            "name": "com.unity.modules.unitywebrequest",
+            "expression": "",
+            "define": "STELLARARCHIVE_WEBREQUEST_SUPPORT"
+        },
+        {
+            "name": "com.cysharp.unitask",
+            "expression": "",
+            "define": "STELLARARCHIVE_UNITASK_SUPPORT"
+        },
+        {
+            "name": "com.unity.addressables",
+            "expression": "",
+            "define": "STELLARARCHIVE_ADDRESSABLE_SUPPORT"
+        },
+        {
+            "name": "com.unity.textmeshpro",
+            "expression": "",
+            "define": "STELLARARCHIVE_TEXTMESHPRO_SUPPORT"
+        }
+    ],
+    "noEngineReferences": false
 }

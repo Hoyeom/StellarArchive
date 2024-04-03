@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -30,7 +31,6 @@ namespace StellarArchive
             Unrestricted,
             Elastic,
             Clamped,
-            Loop
         }
         
         public enum ScrollbarVisibility
@@ -91,12 +91,13 @@ namespace StellarArchive
         private Vector2 _prevPosition = Vector2.zero;
         private Bounds _prevContentBounds;
         private Bounds _prevViewBounds;
-        private List<GameObject> _gameObjects;
         private Vector2 _contentOffset;
         private int _itemCount;
         private int _itemIndex;
+        private List<GameObject> _gameObjects = new List<GameObject>();
 
-
+        public delegate void OnUpdateItemHandler(int objectIndex, int itemIndex);
+        public event OnUpdateItemHandler OnUpdateItem = delegate { }; 
         public virtual float minWidth => -1;
         public virtual float preferredWidth => -1;
         public virtual float flexibleWidth => -1;
@@ -257,6 +258,9 @@ namespace StellarArchive
             if (_direction is Direction.Vertical && _verticalScrollbar)
                 _verticalScrollbar.onValueChanged.AddListener(SetVerticalNormalizedPosition);
 
+            _itemCount = 100;
+
+            UpdateItems();
             CanvasUpdateRegistry.RegisterCanvasElementForLayoutRebuild(this);
             SetDirty();
         }
@@ -522,20 +526,16 @@ namespace StellarArchive
             _vSliderWidth = (_verticalScrollbarRect == null ? 0 : _verticalScrollbarRect.rect.width);
 
             _maxObjectCount = CalculateMaxObjects() + 2;
-            
-            
-            if(!Application.isPlaying) return;
 
+#if UNITY_EDITOR
+            if(!Application.isPlaying) return;
+#endif
             if(_testPrefab == null) return;
             
-            if (_gameObjects == null)
-            {
-                _gameObjects = new List<GameObject>();
-            }
-
             for (int i = _gameObjects.Count; i < _maxObjectCount; i++)
             {
-                _gameObjects.Add(Instantiate(_testPrefab, content));
+                _gameObjects.Add(Instantiate(_testPrefab, _content));
+                _gameObjects[i].name = i.ToString();
             }
         }
 
@@ -660,23 +660,51 @@ namespace StellarArchive
             return Vector2.zero;
         }
 
+        private void UpdateItem(int objectIndex, int itemIndex)
+        {
+            bool visible = objectIndex < _itemCount;
+            
+            _gameObjects[objectIndex].SetActive(visible);
+
+            if (visible)
+            {
+                _gameObjects[objectIndex].GetComponent<ViewText>().SetText($"ItemIndex : {itemIndex}");
+                OnUpdateItem?.Invoke(objectIndex, itemIndex);
+            }
+        }
+
+        public void UpdateItems()
+        {
+            int itemIndex = _itemIndex;
+            for (int i = 0; i < _gameObjects.Count; i++)
+            {
+                UpdateItem(i, itemIndex++);
+            }
+        }
+
         protected virtual void SetContentAnchoredPosition(Vector2 position)
         {
-            _itemCount = 100;
-            
             var layoutItemSize = GetLayoutItemSize();
             
             if (position.y > layoutItemSize.y * 2)
             {
-                if (_itemIndex + 1 < _itemCount)
+                if (_itemIndex + _maxObjectCount < _itemCount)
                 {
                     _contentOffset += layoutItemSize;
                     position = layoutItemSize;
                     _prevPosition -= layoutItemSize;
-
+                    
                     _itemIndex++;
-                    Debug.Log(_itemIndex);
+                    int objectIndex = 0;
+                    int itemIndex = _itemIndex + _maxObjectCount - 1;
+                    UpdateItem(objectIndex, itemIndex);
 
+                    var firstGameObject = _gameObjects[objectIndex];
+                    firstGameObject.transform.SetSiblingIndex(_maxObjectCount - 1);
+                    _gameObjects.RemoveAt(objectIndex);
+                    _gameObjects.Add(firstGameObject);
+                    
+                    
                     if (_dragging)
                     {
                         _contentStartPosition -= layoutItemSize;
@@ -692,8 +720,15 @@ namespace StellarArchive
                     _prevPosition += layoutItemSize * 2;
 
                     _itemIndex--;
-                    Debug.Log(_itemIndex);
-
+                    int objectIndex = _gameObjects.Count - 1;
+                    var itemIndex = _itemIndex;
+                    UpdateItem(objectIndex, itemIndex);
+                    
+                    var lastGameObject = _gameObjects[objectIndex];
+                    lastGameObject.transform.SetSiblingIndex(0);
+                    _gameObjects.RemoveAt(_maxObjectCount - 1);
+                    _gameObjects.Insert(0, lastGameObject);
+                    
                     if (_dragging)
                     {
                         _contentStartPosition += layoutItemSize;
