@@ -25,7 +25,7 @@ namespace UnityEditor.UI
         SerializedProperty _verticalScrollbarSpacing;
         SerializedProperty _onValueChanged;
         SerializedProperty _testPrefab;
-        SerializedProperty _itemHeight;
+        SerializedProperty _itemSize;
         AnimBool _showElasticity;
         AnimBool _showDecelerationRate;
         bool _viewportIsNotChild, _hScrollbarIsNotChild, _vScrollbarIsNotChild;
@@ -50,7 +50,7 @@ namespace UnityEditor.UI
             _verticalScrollbarSpacing      = serializedObject.FindProperty("_verticalScrollbarSpacing");
             _onValueChanged        = serializedObject.FindProperty("_onValueChanged");
             _testPrefab        = serializedObject.FindProperty("_testPrefab");
-            _itemHeight        = serializedObject.FindProperty("_itemHeight");
+            _itemSize        = serializedObject.FindProperty("_itemSize");
 
             _showElasticity = new AnimBool(Repaint);
             _showDecelerationRate = new AnimBool(Repaint);
@@ -174,7 +174,7 @@ namespace UnityEditor.UI
            
             EditorGUILayout.Space();
 
-            EditorGUILayout.PropertyField(_itemHeight);
+            EditorGUILayout.PropertyField(_itemSize);
             
             serializedObject.ApplyModifiedProperties();
         }

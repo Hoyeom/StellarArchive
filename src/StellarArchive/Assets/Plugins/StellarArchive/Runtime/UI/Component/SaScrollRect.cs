@@ -68,9 +68,8 @@ namespace StellarArchive
         [SerializeField] private ScrollRectEvent _onValueChanged = new ScrollRectEvent();
         [SerializeField] private ScrollbarVisibility _horizontalScrollbarVisibility;
         [SerializeField] private ScrollbarVisibility _verticalScrollbarVisibility;
-        [SerializeField] private LayoutGroup _layoutGroup;
         [SerializeField] private GameObject _testPrefab;
-        [SerializeField] private float _itemHeight;
+        [SerializeField] private Vector2 _itemSize;
         
         protected Vector2 _contentStartPosition = Vector2.zero;
         protected Bounds _contentBounds;
@@ -83,6 +82,8 @@ namespace StellarArchive
         private DrivenRectTransformTracker _tracker;
         private RectTransform _horizontalScrollbarRect;
         private RectTransform _verticalScrollbarRect;
+        private VerticalLayoutGroup _verticalLayoutGroup;
+        private HorizontalLayoutGroup _horizontalLayoutGroup;
         private bool _hSliderExpand;
         private bool _vSliderExpand;
         private float _hSliderHeight;
@@ -91,7 +92,6 @@ namespace StellarArchive
         private Vector2 _prevPosition = Vector2.zero;
         private Bounds _prevContentBounds;
         private Bounds _prevViewBounds;
-        private Vector2 _contentOffset;
         private int _itemCount;
         private int _itemIndex;
         private List<GameObject> _gameObjects = new List<GameObject>();
@@ -245,8 +245,15 @@ namespace StellarArchive
         {
             if (_content != null)
             {
-                _layoutGroup = content.GetComponent<LayoutGroup>();
-                _contentOffset = _content.anchoredPosition;
+                if (_direction is Direction.Horizontal)
+                {
+                    _horizontalLayoutGroup = content.GetComponent<HorizontalLayoutGroup>();
+                }
+                else
+                {
+                    _verticalLayoutGroup = content.GetComponent<VerticalLayoutGroup>();
+                }
+                
                 _itemIndex = 0;
             }
         }
@@ -361,7 +368,7 @@ namespace StellarArchive
                 else
                     _horizontalScrollbar.size = 1;
 
-                _horizontalScrollbar.value = horizontalNormalizedPosition;
+                _horizontalScrollbar.SetValueWithoutNotify(horizontalNormalizedPosition);
             }
 
             if (_verticalScrollbar)
@@ -371,7 +378,7 @@ namespace StellarArchive
                 else
                     _verticalScrollbar.size = 1;
 
-                _verticalScrollbar.value = verticalNormalizedPosition;
+                _verticalScrollbar.SetValueWithoutNotify(verticalNormalizedPosition);
             }
         }
         
@@ -390,14 +397,13 @@ namespace StellarArchive
         {
             EnsureLayoutHasRebuilt();
             UpdateBounds();
+            
             float hiddenLength = _contentBounds.size[axis] - _viewBounds.size[axis];
             float contentBoundsMinPosition = _viewBounds.min[axis] - value * hiddenLength;
             float newAnchoredPosition = _content.anchoredPosition[axis] + contentBoundsMinPosition - _contentBounds.min[axis];
 
             Vector3 anchoredPosition = _content.anchoredPosition;
 
-           
-            
             if (Mathf.Abs(anchoredPosition[axis] - newAnchoredPosition) > 0.01f)
             {
                 anchoredPosition[axis] = newAnchoredPosition;
@@ -459,9 +465,7 @@ namespace StellarArchive
             UpdateBounds();
 
             var pointerDelta = localCursor - _pointerStartLocalCursor;
-
             Vector2 position = _contentStartPosition + pointerDelta;
-            
             // Offset to get content into place in the view.
             Vector2 offset = CalculateOffset(position - _content.anchoredPosition);
             
@@ -525,7 +529,7 @@ namespace StellarArchive
             _hSliderHeight = (_horizontalScrollbarRect == null ? 0 : _horizontalScrollbarRect.rect.height);
             _vSliderWidth = (_verticalScrollbarRect == null ? 0 : _verticalScrollbarRect.rect.width);
 
-            _maxObjectCount = CalculateMaxObjects() + 2;
+            _maxObjectCount = CalculateViewportMaxItemCount() + 4;
 
 #if UNITY_EDITOR
             if(!Application.isPlaying) return;
@@ -539,23 +543,20 @@ namespace StellarArchive
             }
         }
 
-        int CalculateMaxObjects()
+        int CalculateViewportMaxItemCount()
         {
-            if (_layoutGroup is VerticalLayoutGroup verticalLayoutGroup)
+            if (_direction is Direction.Vertical)
             {
-                float topPadding = verticalLayoutGroup.padding.top;
-                float bottomPadding = verticalLayoutGroup.padding.bottom;
-                float spacing = verticalLayoutGroup.spacing;
-            
-                float totalHeight = ((RectTransform)transform).rect.height - (topPadding + bottomPadding);
-                float totalItemHeight = _itemHeight + spacing;
-                int maxItems = Mathf.CeilToInt(totalHeight / totalItemHeight);
-                return maxItems;
+                float spacing = _verticalLayoutGroup.spacing;
+                float itemHeight = _itemSize.y;
+                float viewRectHeight = _rect.rect.height;
+                int maxItemCount = Mathf.CeilToInt(viewRectHeight / (itemHeight + spacing));
+                return maxItemCount;
             }
             
             return 0;
         }
-        
+
         public void Rebuild(CanvasUpdate executing)
         {
             if (executing == CanvasUpdate.Prelayout)
@@ -645,21 +646,6 @@ namespace StellarArchive
             _contentBounds = GetBounds();
         }
 
-        private Vector2 GetLayoutItemSize()
-        {
-            if (_layoutGroup is VerticalLayoutGroup verticalLayoutGroup)
-            {
-                var top = verticalLayoutGroup.padding.top;
-                var spacing = verticalLayoutGroup.spacing;
-                var itemHeight = _itemHeight;
-                var itemOffsetY = itemHeight + spacing;
-
-                return Vector2.up * itemOffsetY;
-            }
-
-            return Vector2.zero;
-        }
-
         private void UpdateItem(int objectIndex, int itemIndex)
         {
             bool visible = objectIndex < _itemCount;
@@ -682,56 +668,66 @@ namespace StellarArchive
             }
         }
 
+        
         protected virtual void SetContentAnchoredPosition(Vector2 position)
         {
-            var layoutItemSize = GetLayoutItemSize();
-            
-            if (position.y > layoutItemSize.y * 2)
+            if (_direction is Direction.Vertical)
             {
-                if (_itemIndex + _maxObjectCount < _itemCount)
+                float front = _verticalLayoutGroup.padding.top;
+                float end = _verticalLayoutGroup.padding.bottom;
+                float spacing = _verticalLayoutGroup.spacing;
+                float itemSize = _itemSize.y;
+                float scrollEndPos = _content.rect.size.y - _rect.rect.size.y;
+                float normalizePos = position.y / scrollEndPos;
+                
+                
+                if (position.y > (itemSize + spacing) * 3 - spacing + front)
                 {
-                    _contentOffset += layoutItemSize;
-                    position = layoutItemSize;
-                    _prevPosition -= layoutItemSize;
-                    
-                    _itemIndex++;
-                    int objectIndex = 0;
-                    int itemIndex = _itemIndex + _maxObjectCount - 1;
-                    UpdateItem(objectIndex, itemIndex);
-
-                    var firstGameObject = _gameObjects[objectIndex];
-                    firstGameObject.transform.SetSiblingIndex(_maxObjectCount - 1);
-                    _gameObjects.RemoveAt(objectIndex);
-                    _gameObjects.Add(firstGameObject);
-                    
-                    
-                    if (_dragging)
+                    if (_itemIndex + _maxObjectCount < _itemCount)
                     {
-                        _contentStartPosition -= layoutItemSize;
+                        var offset = (itemSize + spacing) * 2 - spacing;
+                            
+                        position.y = offset;
+                        _prevPosition.y -= offset;
+
+                        _itemIndex++;
+                        int objectIndex = 0;
+                        int itemIndex = _itemIndex + _maxObjectCount - 1;
+                        UpdateItem(objectIndex, itemIndex);
+
+                        var firstGameObject = _gameObjects[objectIndex];
+                        firstGameObject.transform.SetSiblingIndex(_maxObjectCount - 1);
+                        _gameObjects.RemoveAt(objectIndex);
+                        _gameObjects.Add(firstGameObject);
+                        if (_dragging)
+                        {
+                            _contentStartPosition.y -= itemSize;
+                        }
                     }
                 }
-            }
-            else if (position.y < layoutItemSize.y)
-            {
-                if (_itemIndex - 1 > -1)
+                else if (position.y < scrollEndPos - ((itemSize + spacing) * 3 - spacing + end))
                 {
-                    _contentOffset -= layoutItemSize * 2;
-                    position = layoutItemSize * 2;
-                    _prevPosition += layoutItemSize * 2;
-
-                    _itemIndex--;
-                    int objectIndex = _gameObjects.Count - 1;
-                    var itemIndex = _itemIndex;
-                    UpdateItem(objectIndex, itemIndex);
-                    
-                    var lastGameObject = _gameObjects[objectIndex];
-                    lastGameObject.transform.SetSiblingIndex(0);
-                    _gameObjects.RemoveAt(_maxObjectCount - 1);
-                    _gameObjects.Insert(0, lastGameObject);
-                    
-                    if (_dragging)
+                    if (_itemIndex - 1 > -1)
                     {
-                        _contentStartPosition += layoutItemSize;
+                        var offset = (itemSize + spacing) * 2 - spacing;
+
+                        position.y = scrollEndPos - offset;
+                        _prevPosition.y += offset;
+
+                        _itemIndex--;
+                        int objectIndex = _gameObjects.Count - 1;
+                        var itemIndex = _itemIndex;
+                        UpdateItem(objectIndex, itemIndex);
+                    
+                        var lastGameObject = _gameObjects[objectIndex];
+                        lastGameObject.transform.SetSiblingIndex(0);
+                        _gameObjects.RemoveAt(_maxObjectCount - 1);
+                        _gameObjects.Insert(0, lastGameObject);
+                    
+                        if (_dragging)
+                        {
+                            _contentStartPosition.y += itemSize;
+                        }
                     }
                 }
             }
@@ -829,7 +825,6 @@ namespace StellarArchive
                 else if (minOffset < -0.001f)
                     offset.y = minOffset;
             }
-
             return offset;
         }
         
