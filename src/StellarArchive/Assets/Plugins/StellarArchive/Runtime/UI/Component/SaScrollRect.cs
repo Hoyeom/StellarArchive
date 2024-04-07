@@ -71,8 +71,10 @@ namespace StellarArchive
         [SerializeField] private GameObject _testPrefab;
         [SerializeField] private Vector2 _itemSize;
         
-        protected Vector2 _contentStartPosition = Vector2.zero;
-        protected Bounds _contentBounds;
+        private Vector2 _contentStartPosition = Vector2.zero;
+        private Vector2 _contentVirtualPosition = Vector2.zero;
+        private Bounds _contentBounds;
+        private Bounds _loopContentBounds;
         
         private Vector2 _pointerStartLocalCursor = Vector2.zero;
         private bool _dragging;
@@ -139,6 +141,7 @@ namespace StellarArchive
             get
             {
                 UpdateBounds();
+                
                 if ((_contentBounds.size.x <= _viewBounds.size.x) || Mathf.Approximately(_contentBounds.size.x, _viewBounds.size.x))
                     return (_viewBounds.min.x > _contentBounds.min.x) ? 1 : 0;
                 return (_viewBounds.min.x - _contentBounds.min.x) / (_contentBounds.size.x - _viewBounds.size.x);
@@ -154,10 +157,11 @@ namespace StellarArchive
             get
             {
                 UpdateBounds();
-                if ((_contentBounds.size.y <= _viewBounds.size.y) || Mathf.Approximately(_contentBounds.size.y, _viewBounds.size.y))
-                    return (_viewBounds.min.y > _contentBounds.min.y) ? 1 : 0;
-
-                return (_viewBounds.min.y - _contentBounds.min.y) / (_contentBounds.size.y - _viewBounds.size.y);
+                if ((_loopContentBounds.size.y <= _viewBounds.size.y) || Mathf.Approximately(_loopContentBounds.size.y, _viewBounds.size.y))
+                    return (_viewBounds.min.y > _loopContentBounds.min.y) ? 1 : 0;
+                
+                return 1 - (_contentVirtualPosition.y) / (_loopContentBounds.size.y - _viewBounds.size.y);
+                // return (_viewBounds.min.y - _loopContentBounds.min.y) / (_loopContentBounds.size.y - _viewBounds.size.y);
             }
             set
             {
@@ -221,7 +225,7 @@ namespace StellarArchive
                 return _rect;
             }
         }
-
+        
         private bool hScrollingNeeded
         {
             get
@@ -266,8 +270,7 @@ namespace StellarArchive
                 _verticalScrollbar.onValueChanged.AddListener(SetVerticalNormalizedPosition);
 
             _itemCount = 100;
-
-            UpdateItems();
+            
             CanvasUpdateRegistry.RegisterCanvasElementForLayoutRebuild(this);
             SetDirty();
         }
@@ -352,9 +355,13 @@ namespace StellarArchive
         private void UpdatePrevData()
         {
             if (_content == null)
+            {
                 _prevPosition = Vector2.zero;
+            }
             else
+            {
                 _prevPosition = _content.anchoredPosition;
+            }
             _prevViewBounds = _viewBounds;
             _prevContentBounds = _contentBounds;
         }
@@ -374,10 +381,12 @@ namespace StellarArchive
             if (_verticalScrollbar)
             {
                 if (_contentBounds.size.y > 0)
-                    _verticalScrollbar.size = Mathf.Clamp01((_viewBounds.size.y - Mathf.Abs(offset.y)) / _contentBounds.size.y);
+                    _verticalScrollbar.size = Mathf.Clamp01((_viewBounds.size.y - Mathf.Abs(offset.y)) / _loopContentBounds.size.y);
                 else
                     _verticalScrollbar.size = 1;
 
+                // var normalize = 1 - (float)_itemIndex / (_itemCount - _maxObjectCount);
+                // _verticalScrollbar.SetValueWithoutNotify(normalize);
                 _verticalScrollbar.SetValueWithoutNotify(verticalNormalizedPosition);
             }
         }
@@ -392,24 +401,52 @@ namespace StellarArchive
             if (!_hasRebuiltLayout && !CanvasUpdateRegistry.IsRebuildingLayout())
                 Canvas.ForceUpdateCanvases();
         }
-        
+
         protected virtual void SetNormalizedPosition(float value, int axis)
         {
             EnsureLayoutHasRebuilt();
             UpdateBounds();
+            float hiddenLength = _loopContentBounds.size[axis] - _viewBounds.size[axis];
             
-            float hiddenLength = _contentBounds.size[axis] - _viewBounds.size[axis];
-            float contentBoundsMinPosition = _viewBounds.min[axis] - value * hiddenLength;
-            float newAnchoredPosition = _content.anchoredPosition[axis] + contentBoundsMinPosition - _contentBounds.min[axis];
+            _itemIndex = Mathf.RoundToInt(Mathf.Lerp(0, _itemCount - _maxObjectCount, 1 - value));
+            _contentVirtualPosition[axis] = hiddenLength * (1 - value);
+            var anchoredPosition = _content.anchoredPosition;
+            
+            var newAnchoredPosition = _contentVirtualPosition[axis];
+            
+            Debug.Log($"[SetNormalizedPosition] {newAnchoredPosition} {value}");
+            
+            float top = _verticalLayoutGroup.padding.top;
+            float bottom = _verticalLayoutGroup.padding.bottom;
+            float spacing = _verticalLayoutGroup.spacing;
+            float itemSize = _itemSize.y;
+            float topBound = (itemSize + spacing) * 3 - spacing + top;
+            var offset = (itemSize + spacing) * 2 - spacing;
+            float scrollEndPos = _content.rect.size.y - _rect.rect.size.y;
+            float bottomBound = scrollEndPos - ((itemSize + spacing) * 3 - spacing + bottom);
 
-            Vector3 anchoredPosition = _content.anchoredPosition;
+            if (newAnchoredPosition > topBound)
+            {
+                if (topBound > (hiddenLength - newAnchoredPosition))
+                {
+                    newAnchoredPosition = topBound + (_maxObjectCount - 1) * spacing + (newAnchoredPosition % itemSize);
+                }
+                else
+                {
+                    newAnchoredPosition = offset + (newAnchoredPosition % itemSize);
+                }
+            }
+            
+            newAnchoredPosition = Mathf.Clamp(newAnchoredPosition, 0, scrollEndPos);
 
+            
             if (Mathf.Abs(anchoredPosition[axis] - newAnchoredPosition) > 0.01f)
             {
                 anchoredPosition[axis] = newAnchoredPosition;
                 _content.anchoredPosition = anchoredPosition;
                 _velocity[axis] = 0;
-
+                
+                UpdateItems();
                 UpdateBounds();
             }
         }
@@ -539,7 +576,7 @@ namespace StellarArchive
             for (int i = _gameObjects.Count; i < _maxObjectCount; i++)
             {
                 _gameObjects.Add(Instantiate(_testPrefab, _content));
-                _gameObjects[i].name = i.ToString();
+                _gameObjects[i].name = (i + 1).ToString();
             }
         }
 
@@ -615,6 +652,7 @@ namespace StellarArchive
                 LayoutRebuilder.ForceRebuildLayoutImmediate(content);
                 _viewBounds = new Bounds(viewRect.rect.center, viewRect.rect.size);
                 _contentBounds = GetBounds();
+                _loopContentBounds = GetLoopBounds();
             }
 
             if (_vSliderExpand && vScrollingNeeded)
@@ -624,6 +662,7 @@ namespace StellarArchive
                 LayoutRebuilder.ForceRebuildLayoutImmediate(content);
                 _viewBounds = new Bounds(viewRect.rect.center, viewRect.rect.size);
                 _contentBounds = GetBounds();
+                _loopContentBounds = GetLoopBounds();
             }
 
             if (_hSliderExpand && hScrollingNeeded)
@@ -631,6 +670,7 @@ namespace StellarArchive
                 viewRect.sizeDelta = new Vector2(viewRect.sizeDelta.x, -(_hSliderHeight + _horizontalScrollbarSpacing));
                 _viewBounds = new Bounds(viewRect.rect.center, viewRect.rect.size);
                 _contentBounds = GetBounds();
+                _loopContentBounds = GetLoopBounds();
             }
 
             if (_vSliderExpand && vScrollingNeeded && viewRect.sizeDelta.x == 0 && viewRect.sizeDelta.y < 0)
@@ -644,6 +684,7 @@ namespace StellarArchive
             UpdateScrollbarLayout();
             _viewBounds = new Bounds(viewRect.rect.center, viewRect.rect.size);
             _contentBounds = GetBounds();
+            _loopContentBounds = GetLoopBounds();
         }
 
         private void UpdateItem(int objectIndex, int itemIndex)
@@ -667,29 +708,62 @@ namespace StellarArchive
                 UpdateItem(i, itemIndex++);
             }
         }
-
         
         protected virtual void SetContentAnchoredPosition(Vector2 position)
         {
             if (_direction is Direction.Vertical)
             {
-                float front = _verticalLayoutGroup.padding.top;
-                float end = _verticalLayoutGroup.padding.bottom;
+                TrySetLoopPosition(ref position.y);
+
+                float delta = position.y - _content.anchoredPosition.y;
+                _contentVirtualPosition.y += delta;
+            }
+
+            if (_direction is Direction.Horizontal)
+            {
+                TrySetLoopPosition(ref position.x);
+            }
+           
+
+            if (_direction is not Direction.Horizontal)
+                position.x = _content.anchoredPosition.x;
+            if (_direction is not Direction.Vertical)
+                position.y = _content.anchoredPosition.y;
+
+            if (position != _content.anchoredPosition)
+            {
+                _content.anchoredPosition = position;
+                UpdateBounds();
+            }
+        }
+
+        private bool TrySetLoopPosition(ref float position)
+        {
+            bool isLoop = false;
+            
+            if (_direction is Direction.Vertical)
+            {
+                float top = _verticalLayoutGroup.padding.top;
+                float bottom = _verticalLayoutGroup.padding.bottom;
                 float spacing = _verticalLayoutGroup.spacing;
                 float itemSize = _itemSize.y;
                 float scrollEndPos = _content.rect.size.y - _rect.rect.size.y;
-                float normalizePos = position.y / scrollEndPos;
+
+                float topBound = (itemSize + spacing) * 3 - spacing + top;
+                float bottomBound = scrollEndPos - ((itemSize + spacing) * 3 - spacing + bottom);
                 
-                
-                if (position.y > (itemSize + spacing) * 3 - spacing + front)
+                if (position > topBound)
                 {
                     if (_itemIndex + _maxObjectCount < _itemCount)
                     {
+                        isLoop = true;
+                        float delta = position - topBound;
                         var offset = (itemSize + spacing) * 2 - spacing;
-                            
-                        position.y = offset;
-                        _prevPosition.y -= offset;
 
+                        position = offset;
+                        _prevPosition.y -= offset;
+                        _contentVirtualPosition.y += topBound - offset;
+                        
                         _itemIndex++;
                         int objectIndex = 0;
                         int itemIndex = _itemIndex + _maxObjectCount - 1;
@@ -705,14 +779,17 @@ namespace StellarArchive
                         }
                     }
                 }
-                else if (position.y < scrollEndPos - ((itemSize + spacing) * 3 - spacing + end))
+                else if (position < bottomBound)
                 {
                     if (_itemIndex - 1 > -1)
                     {
+                        isLoop = true;
+                        float delta = position - bottomBound;
                         var offset = (itemSize + spacing) * 2 - spacing;
 
-                        position.y = scrollEndPos - offset;
+                        position = scrollEndPos - offset;
                         _prevPosition.y += offset;
+                        _contentVirtualPosition.y -= topBound - offset;
 
                         _itemIndex--;
                         int objectIndex = _gameObjects.Count - 1;
@@ -731,20 +808,11 @@ namespace StellarArchive
                     }
                 }
             }
-            
-            if (_direction is not Direction.Horizontal)
-                position.x = _content.anchoredPosition.x;
-            if (_direction is not Direction.Vertical)
-                position.y = _content.anchoredPosition.y;
 
-            if (position != _content.anchoredPosition)
-            {
-                _content.anchoredPosition = position;
-                UpdateBounds();
-            }
+            return isLoop;
         }
-        
-         void UpdateScrollbarLayout()
+
+        void UpdateScrollbarLayout()
         {
             if (_vSliderExpand && _horizontalScrollbar)
             {
@@ -846,6 +914,7 @@ namespace StellarArchive
         {
             _viewBounds = new Bounds(viewRect.rect.center, viewRect.rect.size);
             _contentBounds = GetBounds();
+            _loopContentBounds = GetLoopBounds();
 
             if (_content == null)
                 return;
@@ -895,6 +964,29 @@ namespace StellarArchive
         }
         
         private readonly Vector3[] _corners = new Vector3[4];
+
+        private Bounds GetLoopBounds()
+        {
+            Vector2 contentsSize = GetContentSize();
+
+            Rect rect = this._content.rect;
+            float x = rect.x;
+            float y = -contentsSize.y;
+            float xMax = contentsSize.x;
+            float yMax = rect.yMax;
+            _corners[0] = new Vector3(x, y, 0.0f);
+            _corners[1] = new Vector3(x, yMax, 0.0f);
+            _corners[2] = new Vector3(xMax, yMax, 0.0f);
+            _corners[3] = new Vector3(xMax, y, 0.0f);
+
+            Matrix4x4 localToWorldMatrix = _content.localToWorldMatrix;
+            for (int index = 0; index < 4; ++index)
+                _corners[index] = localToWorldMatrix.MultiplyPoint(_corners[index]);
+
+            var viewWorldToLocalMatrix = viewRect.worldToLocalMatrix;
+            return InternalGetBounds(_corners, ref viewWorldToLocalMatrix);
+        }
+
         private Bounds GetBounds()
         {
             if (_content == null)
@@ -905,6 +997,28 @@ namespace StellarArchive
             return InternalGetBounds(_corners, ref viewWorldToLocalMatrix);
         }
 
+        private Vector2 GetContentSize()
+        {
+            Vector2 top = Vector2.zero;
+            Vector2 bottom = Vector2.zero;
+            Vector2 right = Vector2.zero;
+            Vector2 left = Vector2.zero;
+            Vector2 totalSpacing = Vector2.zero;
+            Vector2 totalItemSize = Vector2.zero;
+            
+            if (_direction is Direction.Vertical)
+            {
+                var padding = _verticalLayoutGroup.padding;
+                top = Vector2.up * padding.top;
+                bottom = Vector2.up * padding.bottom;
+                right = Vector2.right *  padding.right;
+                left = Vector2.right *  padding.left;
+                totalSpacing = Vector2.up * (_verticalLayoutGroup.spacing * Mathf.Max(_itemCount - 1, 0));
+                totalItemSize = Vector2.right * _contentBounds.size.x + Vector2.up * (_itemSize.y * _itemCount);
+            }
+
+            return top + bottom + right + left + totalSpacing + totalItemSize;
+        }
         
         private static void UpdateOneScrollbarVisibility(bool xScrollingNeeded, bool xAxisEnabled, ScrollbarVisibility scrollbarVisibility, Scrollbar scrollbar)
         {
