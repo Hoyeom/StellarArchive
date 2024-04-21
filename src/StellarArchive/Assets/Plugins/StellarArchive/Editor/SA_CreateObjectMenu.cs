@@ -1,16 +1,54 @@
-﻿using UnityEditor;
+﻿using System;
+using StellarArchive.Editor;
+using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 #if STELLARARCHIVE_TEXTMESHPRO_SUPPORT
 using TMPro;
 #endif
 
-namespace StellarArchive.Editor
+namespace UnityEditor.UI
 {
     public static class SA_CreateObjectMenu
     {
+        private class DefaultEditorFactory : DefaultControls.IFactoryControls
+        {
+            public static DefaultEditorFactory Default = new DefaultEditorFactory();
+
+            public GameObject CreateGameObject(string name, params Type[] components)
+            {
+                return ObjectFactory.CreateGameObject(name, components);
+            }
+        }
+        
+        private class FactorySwapToEditor : IDisposable
+        {
+            DefaultControls.IFactoryControls factory;
+
+            public FactorySwapToEditor()
+            {
+                factory = DefaultControls.factory;
+                DefaultControls.factory = DefaultEditorFactory.Default;
+            }
+
+            public void Dispose()
+            {
+                DefaultControls.factory = factory;
+            }
+        }
+        
+        [MenuItem("GameObject/StellarArchive/Infinity Scroll View", false, 1)]
+        static public void AddScrollView(MenuCommand menuCommand)
+        {
+            GameObject go;
+            using (new FactorySwapToEditor())
+                go = SA_DefaultControls.CreateInfinityScrollView(GetStandardResources());
+            PlaceUIElementRoot(go, menuCommand);
+        }
+        
 #if STELLARARCHIVE_TEXTMESHPRO_SUPPORT
         [MenuItem("GameObject/StellarArchive/Button - TextMeshPro", false, 0)]
         public static void AddButton(MenuCommand menuCommand)
@@ -35,10 +73,11 @@ namespace StellarArchive.Editor
         private const string kDropdownArrowPath = "UI/Skin/DropdownArrow.psd";
         private const string kMaskPath = "UI/Skin/UIMask.psd";
 
-#if STELLARARCHIVE_TEXTMESHPRO_SUPPORT
-        private static TMP_DefaultControls.Resources s_StandardResources;
+        private static SA_DefaultControls.Resources s_StandardResources;
 
-        private static TMP_DefaultControls.Resources GetStandardResources()
+#if STELLARARCHIVE_TEXTMESHPRO_SUPPORT
+
+        private static SA_DefaultControls.Resources GetStandardResources()
         {
             if (s_StandardResources.standard == null)
             {
