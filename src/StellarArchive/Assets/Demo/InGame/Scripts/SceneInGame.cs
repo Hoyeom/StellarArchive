@@ -2,7 +2,6 @@ using System;
 using Cysharp.Threading.Tasks;
 using StellarArchive;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 public class SceneInGame : BaseScene
 {
