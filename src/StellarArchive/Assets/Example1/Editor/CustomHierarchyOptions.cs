@@ -48,6 +48,7 @@ public class CustomHierarchyOptions
         {
             PaddingsMap.Clear();
             DrawActiveToggleButton(instanceId, selectionRect);
+            DrawZoomInButton(instanceId, selectionRect);
             if(gameObject.TryGetComponent<Info>(out _))
                 DrawInfoButton(instanceId, selectionRect);
             IconContent(instanceId, selectionRect);
@@ -125,14 +126,30 @@ public class CustomHierarchyOptions
         }
         float size = IconSize;
         float padding = IconPadding;
-        var type = typeof(Info);
 
         Vector2 position = GetNextPosition(id, rect, IconSize, padding);
-        Texture texture = Resources.Load("Info_Icon") as Texture;
+        Texture texture = Resources.Load("Info") as Texture;
 
         DrawButtonWitchTexture(position, size, texture, () =>
         {
             
+        }, gameObject, tooltip);
+    }
+    
+    static void DrawZoomInButton(int id, Rect rect)
+    {
+        GameObject gameObject = EditorUtility.InstanceIDToObject(id) as GameObject;
+        float size = IconSize;
+        float padding = IconPadding;
+        string tooltip = "Frame this game object";
+
+        Vector2 position = GetNextPosition(id, rect, IconSize, padding);
+        Texture texture = Resources.Load("Zoom_In") as Texture;
+
+        DrawButtonWitchTexture(position, size, texture, () =>
+        {
+            Selection.activeGameObject = gameObject;
+            SceneView.FrameLastActiveSceneView();
         }, gameObject, tooltip);
     }
     
